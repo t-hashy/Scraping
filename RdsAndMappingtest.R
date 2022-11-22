@@ -100,7 +100,7 @@ glimpse(world)
 world %>%
   # filter(region == "Japan") %>% # Filtering the area to show
   ggplot(aes(x = long, y = lat, group = group)) + # group: block to show as the same one
-  geom_polygon(fill = "lightgray", colour = "orange", size = 0.1) # fill: color to fill a map, colour: border-color, size: border-size
+  geom_polygon(fill = "lightgray", colour = "white", size = 0.1) # fill: color to fill a map, colour: border-color, size: border-size
 
 ## Prefectural data
 glimpse(jpnprefs)
@@ -148,7 +148,7 @@ left_join(world, pop2013, by = "iso3c") %>%
   ) +
   scale_fill_continuous(
     name = "Population(log)",
-    low = "orange",
+    low = "white",
     high = "darkblue"
   )
 kyoto %>%
@@ -231,7 +231,7 @@ df %>%
   ) + 
   scale_fill_continuous(
     name = "Total Price",
-    low = "orange",
+    low = "white",
     high = "darkblue"
   )
 df %>%
@@ -247,8 +247,11 @@ df %>%
   ) + 
   scale_fill_continuous(
     name = "Total Reviews",
-    low = "orange",
+    low = "white",
     high = "darkblue"
+  ) + 
+  theme(
+    panel.background = element_blank()
   )
 ##
 df %>%
@@ -264,8 +267,11 @@ df %>%
   ) + 
   scale_fill_continuous(
     name = "Average Price",
-    low = "orange",
+    low = "white",
     high = "darkblue"
+  ) + 
+  theme(
+    panel.background = element_blank()
   )
 df %>%
   ggplot() +
@@ -280,8 +286,11 @@ df %>%
   ) + 
   scale_fill_continuous(
     name = "Average Reviews",
-    low = "orange",
+    low = "white",
     high = "darkblue"
+  ) + 
+  theme(
+    panel.background = element_blank()
   )
 ##
 df %>%
@@ -297,8 +306,11 @@ df %>%
   ) + 
   scale_fill_continuous(
     name = "Price STDV",
-    high = "orange",
+    high = "white",
     low = "darkblue"
+  ) + 
+  theme(
+    panel.background = element_blank()
   )
 ##
 df %>%
@@ -309,13 +321,16 @@ df %>%
       fill = stdv_reviews
     ),
     colour = "lightgray",
-    size = 0,
+    size = 0.001,
     show.legend = TRUE
   ) + 
   scale_fill_continuous(
     name = "Reviews STDV",
-    high = "orange",
+    high = "white",
     low = "darkblue"
+  ) + 
+  theme(
+    panel.background = element_blank()
   )
 ##
 par(mfrow = c(1,1))
