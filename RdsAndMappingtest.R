@@ -100,7 +100,7 @@ glimpse(world)
 world %>%
   # filter(region == "Japan") %>% # Filtering the area to show
   ggplot(aes(x = long, y = lat, group = group)) + # group: block to show as the same one
-  geom_polygon(fill = "lightgray", colour = "lightblue", size = 0.1) # fill: color to fill a map, colour: border-color, size: border-size
+  geom_polygon(fill = "lightgray", colour = "orange", size = 0.1) # fill: color to fill a map, colour: border-color, size: border-size
 
 ## Prefectural data
 glimpse(jpnprefs)
@@ -148,7 +148,7 @@ left_join(world, pop2013, by = "iso3c") %>%
   ) +
   scale_fill_continuous(
     name = "Population(log)",
-    low = "lightblue",
+    low = "orange",
     high = "darkblue"
   )
 kyoto %>%
@@ -217,7 +217,7 @@ df <- merge(df, df_grp , by.x = "pref_code", by.y = "jis_code", all.x = T )
 glimpse(df)
 
 # Plotting
-par(mfrow = c(2,1))
+par(mfrow = c(3,2))
 df %>%
   ggplot() +
   geom_sf(
@@ -231,7 +231,7 @@ df %>%
   ) + 
   scale_fill_continuous(
     name = "Total Price",
-    low = "lightblue",
+    low = "orange",
     high = "darkblue"
   )
 df %>%
@@ -247,7 +247,7 @@ df %>%
   ) + 
   scale_fill_continuous(
     name = "Total Reviews",
-    low = "lightblue",
+    low = "orange",
     high = "darkblue"
   )
 ##
@@ -264,7 +264,7 @@ df %>%
   ) + 
   scale_fill_continuous(
     name = "Average Price",
-    low = "lightblue",
+    low = "orange",
     high = "darkblue"
   )
 df %>%
@@ -280,7 +280,7 @@ df %>%
   ) + 
   scale_fill_continuous(
     name = "Average Reviews",
-    low = "lightblue",
+    low = "orange",
     high = "darkblue"
   )
 ##
@@ -297,8 +297,8 @@ df %>%
   ) + 
   scale_fill_continuous(
     name = "Price STDV",
-    low = "lightblue",
-    high = "darkblue"
+    high = "orange",
+    low = "darkblue"
   )
 ##
 df %>%
@@ -314,8 +314,8 @@ df %>%
   ) + 
   scale_fill_continuous(
     name = "Reviews STDV",
-    low = "lightblue",
-    high = "darkblue"
+    high = "orange",
+    low = "darkblue"
   )
 ##
 par(mfrow = c(1,1))
