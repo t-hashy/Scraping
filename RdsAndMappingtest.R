@@ -164,17 +164,158 @@ glimpse(kyoto)
 # Plot price data----
 df <- data_copied
 glimpse(df)
-glimpse(jpnprefs)[]
+glimpse(jpnprefs)
 
 df_new <- merge(df, jpnprefs, by.x = "pref", by.y = "prefecture", all.x = T)
-df <- jpn_pref(df_new$jis_code)
+glimpse(df_new)
+
+# 1. Load "progress" package.
+library(progress)
+# 2. Set create_new_pb(length) function 
+create_new_pb <- function(length){
+  pb <- progress_bar$new(
+    format = "(:spin) [:bar] :percent [Elapsed time: :elapsedfull || Estimated time remaining: :eta]",
+    total = length,
+    complete = "=",
+    incomplete = "-",
+    current = ">",
+    clear = FALSE,
+    width = 100
+  )
+  return(pb)
+}
+# 3. Right before for-loops, set a progress-bar. Note that "length" usually goes like "nrow(df)".
+pb <- create_new_pb(length(unique(df_new$jis_code)))
+df <- NULL
+for(code in unique(df_new$jis_code)){
+  # 4. Inside for-loops, describe "pb$tick()"
+  pb$tick()
+  df_add <- jpn_pref(code)
+  if(length(df) > 0){
+    df <- rbind(df, df_add)
+  }else {
+    df <- df_add
+  }
+}
+
+summary(df)
+glimpse(data_copied)
+
+df_grp <- df_new[,c("jis_code", "price", "reviewCount")] %>%
+  group_by(jis_code) %>%
+  summarize(
+    total_price = sum(price),
+    av_price = mean(price),
+    stdv_price = sd(price),
+    total_reviews = sum(reviewCount),
+    av_reviews = mean(reviewCount),
+    stdv_reviews = sd(reviewCount)
+  )
+glimpse(df_grp)
+  
+df <- merge(df, df_grp , by.x = "pref_code", by.y = "jis_code", all.x = T )
 glimpse(df)
 
+# Plotting
+par(mfrow = c(2,1))
 df %>%
   ggplot() +
   geom_sf(
     aes(
-      fill = prefecture
+      group = pref_code,
+      fill = total_price
     ),
+    colour = "lightgray",
+    size = 0,
     show.legend = TRUE
+  ) + 
+  scale_fill_continuous(
+    name = "Total Price",
+    low = "lightblue",
+    high = "darkblue"
   )
+df %>%
+  ggplot() +
+  geom_sf(
+    aes(
+      group = pref_code,
+      fill = total_reviews
+    ),
+    colour = "lightgray",
+    size = 0,
+    show.legend = TRUE
+  ) + 
+  scale_fill_continuous(
+    name = "Total Reviews",
+    low = "lightblue",
+    high = "darkblue"
+  )
+##
+df %>%
+  ggplot() +
+  geom_sf(
+    aes(
+      group = pref_code,
+      fill = av_price
+    ),
+    colour = "lightgray",
+    size = 0,
+    show.legend = TRUE
+  ) + 
+  scale_fill_continuous(
+    name = "Average Price",
+    low = "lightblue",
+    high = "darkblue"
+  )
+df %>%
+  ggplot() +
+  geom_sf(
+    aes(
+      group = pref_code,
+      fill = av_reviews
+    ),
+    colour = "lightgray",
+    size = 0,
+    show.legend = TRUE
+  ) + 
+  scale_fill_continuous(
+    name = "Average Reviews",
+    low = "lightblue",
+    high = "darkblue"
+  )
+##
+df %>%
+  ggplot() +
+  geom_sf(
+    aes(
+      group = pref_code,
+      fill = stdv_price
+    ),
+    colour = "lightgray",
+    size = 0,
+    show.legend = TRUE
+  ) + 
+  scale_fill_continuous(
+    name = "Price STDV",
+    low = "lightblue",
+    high = "darkblue"
+  )
+##
+df %>%
+  ggplot() +
+  geom_sf(
+    aes(
+      group = pref_code,
+      fill = stdv_reviews
+    ),
+    colour = "lightgray",
+    size = 0,
+    show.legend = TRUE
+  ) + 
+  scale_fill_continuous(
+    name = "Reviews STDV",
+    low = "lightblue",
+    high = "darkblue"
+  )
+##
+par(mfrow = c(1,1))
