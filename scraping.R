@@ -488,6 +488,7 @@ df_to_csv("product_details", df_products_details)
 
 ##
 
+source("C:/Users/taka-/Downloads/e-commerces-analytics/scraping/scraping_tabechoku.R")
 
 # Add dummy columns ----
 df_vegetables$hasGAP <- ifelse(str_detect(df_vegetables$product, "GAP"), "GAP", "no_GAP" ) %>%
