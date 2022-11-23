@@ -159,7 +159,7 @@ for(html in lst_html_products) {
 }
 
 # ---- *Export as Rds file ----
-df_to_rds(df_productsCtg, file_name = "productsCtg", directory = "data/tabechoku")
+export_df(df_productsCtg, file_name = "productsCtg", directory = "data/tabechoku")
 
 # ==== SCRAPING EACH ITEM PAGES ====
 # ---- *Crawl detailed pages one by one ----
@@ -167,9 +167,10 @@ df_to_rds(df_productsCtg, file_name = "productsCtg", directory = "data/tabechoku
 # Set for-loop basics
 pb <- create_new_pb(nrow(df_productsCtg))
 lst_html_details <- list()
-min_sleep <- 0
+min_sleep <- 1
 max_sleep <- 2
-print(paste("~~~~ ESTIMATED: ", ceiling(nrow(df_productsCtg) * mean(min_sleep, max_sleep) / 60), "min", sep = "" ))
+estimated_min <- ceiling(nrow(df_productsCtg) * (((max_sleep - min_sleep) / 2) + min_sleep) / 60)
+print(paste("ESTIMATED: ", estimated_min, "min (", ceiling(estimated_min / 60), "hours)", sep = "" ))
 
 # Crawl and retrieve html nodes
 for(id in df_productsCtg$id_product) {
@@ -198,30 +199,24 @@ for(id in df_productsCtg$id_product) {
       next
     }
   )
-  
-  # Checker
-  if(i > 5) {
-    break
-  }else {
-    i + 1
-  }
 }
 
-lst_html_details
 
 # ---- *Extract values from html ----
 # ---- *Export as Rds file ----
+save(lst_html_details, file = "details_20221124.RData")
 
 
 
-
-
+#---- OTHERS ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ----
 
 # Set rules for avoiding continuous scraping damage
 pause_count <- 1 # Pause scraping counter
 
 # Scraping all products page
-for(id in df_ids) {
+for(i in 1:nrow(df_ids)) {
+  # Set id
+  id 
   # Set url for search
   url_temp <- paste(url_products_main , id, sep = "") # URL  /ptoducts/id
   

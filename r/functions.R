@@ -1,32 +1,27 @@
 # ==== DATA FRAME ====
 
 ## ---- *Check the Data ----
-check_data <- function(df) {
+check_data <- function(df, plot = FALSE) {
   glimpse(df)
   print(head(df, n = 5))
   print(summary(df))
-  plot(df)
-  return(NULL)
+  if(plot) {
+    plot(df) 
+  }
+  return("DONE")
 }
 
-## ---- *Export Data-frame as CSV ----
-df_to_csv <- function(df, file_name = "data", directory = "data") {
+## ---- *Export data-frame ----
+export_df <- function(df, file_name = "data", directory = "data", file_type = "Rds") {
   # Set file name
   now <- convert_datetime_into_str()
-  file <- paste(directory, "/", file_name, "_", now, ".csv", sep = "" )
-  # Convert into csv
-  write.csv(x=df, file=file, fileEncoding = "shift-jis")
-  # Return
-  return(file)
-}
-
-## ---- *Export data-frame as Rds ----
-df_to_rds <- function(df, file_name = "data", directory = "data") {
-  # Set file name
-  now <- convert_datetime_into_str()
-  file <- paste(directory, "/", file_name, "_", now, ".Rds", sep = "")
-  # Convert into Rds
-  saveRDS(df, file = file)
+  file <- paste(directory, "/", file_name, "_", now, ".", file_type, sep = "")
+  # Convert into file
+  if(file_type == "Rds"){
+    saveRDS(df, file = file)  
+  }else if(file_type == "csv"){
+    write.csv(x = df, file = file, fileEncoding = "shift-jis")
+  }
   # Return
   return(file)
 }
