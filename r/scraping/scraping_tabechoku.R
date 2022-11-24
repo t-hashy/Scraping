@@ -239,6 +239,9 @@ pb <- create_new_pb(length(lst_html_details))
 df_details <- data.frame()
 df_keywards <- data.frame()
 df_tags <- data.frame()
+df_lctg <- data.frame()
+df_mctg <- data.frame()
+df_sctg <- data.frame()
 
 # Get values as data-frame  
 for(html in lst_html_details) {
