@@ -226,7 +226,7 @@ for(id in df_productsCtg$id_product) {
   }
 
   # Save as insurance
-  if(i %% 50 == 0){
+  if(i %% 10000 == 0){
     export_data(lst_html_details, file_name = "details", directory = "data/tabechoku", file_type = "RData")
   }
   
