@@ -4,7 +4,6 @@ source(paste(getwd(), "/r/functions.R", sep = ""))
 
 library(rvest) # Scraping
 library(tidyverse) # String_extraction (using when shaping data), ggplot, etc..
-library(progress) # Progress bar in for-loop
  
 
 # ---- *Set URLs ----
