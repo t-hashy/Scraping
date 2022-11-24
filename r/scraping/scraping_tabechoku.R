@@ -185,7 +185,7 @@ min_sleep <- 1
 max_sleep <- 2
 estimated_min <- ceiling(nrow(df_productsCtg) * (((max_sleep - min_sleep) / 2) + min_sleep) / 60)
 print(paste("ESTIMATED: ", estimated_min, "min (", ceiling(estimated_min / 60), "hours)", sep = "" ))
-# lst_html_details <- list()
+lst_html_details <- list()
 len <- length(lst_html_details)
 i <- 0
 
