@@ -226,7 +226,7 @@ for(id in df_productsCtg$id_product) {
 
   # Save as insurance
   if(i %% 10000 == 0){
-    export_data(lst_html_details, file_name = "details", directory = "data/tabechoku", file_type = "RData")
+    export_data(lst_html_details, file_name = "details", directory = "data/tabechoku", file_type = "Rds")
   }
   
   # Checker
@@ -234,7 +234,7 @@ for(id in df_productsCtg$id_product) {
 }
 
 # Save html data
-export_data(lst_html_details, file_name = "details",directory = "data/tabechoku", file_type = "RData")
+export_data(lst_html_details, file_name = "details",directory = "data/tabechoku", file_type = "Rds")
 
 # ---- *Extract values from html ----
 
