@@ -82,14 +82,14 @@ extract_prefecture <- function(df) {
   df <- as.character(df)
   for(value in df) {
     pb$tick()
-    if(regexpr("Œ§", value)>0){
-      df[i] = substr(value, 1, regexpr("Œ§", value))
-    }else if(regexpr("–kŠC“¹", value)>0){
-      df[i] = "–kŠC“¹"
-    }else if(regexpr("•{", value)>0){
-      df[i] = substr(value, 1, regexpr("•{", value))
-    }else if(regexpr("“Œ‹ž“s", value)>0){
-      df[i] = "“Œ‹ž“s"
+    if(regexpr("çœŒ", value)>0){
+      df[i] = substr(value, 1, regexpr("çœŒ", value))
+    }else if(regexpr("åŒ—æµ·é“", value)>0){
+      df[i] = "åŒ—æµ·é“"
+    }else if(regexpr("æ±äº¬", value)>0){
+      df[i] = substr(value, 1, regexpr("æ±äº¬", value))
+    }else if(regexpr("åºœ", value)>0){
+      df[i] = "åºœ"
     }
     i = i + 1
   }
