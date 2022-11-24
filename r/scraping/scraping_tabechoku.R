@@ -37,6 +37,9 @@ for(pageNum in 1:maxPageNum_productsCtg) {
   # Show progress and remaining time
   pb$tick()
   
+  # Set checker
+  flag <- TRUE
+  
   # Set URL for search:  parameter = page_number
   url_this <- paste(url_productsCtg , "?page=", pageNum  ,sep = "")
   
@@ -55,9 +58,12 @@ for(pageNum in 1:maxPageNum_productsCtg) {
     
     # If unexpected error occurred, skip for the next loop.
     error = function(e){
-      next
+      flag <- FALSE
     }
   )
+  
+  # Checker
+  if(!flag) next
 }
 
 # ---- *Extract values from html ----
@@ -165,12 +171,14 @@ export_df(df_productsCtg, file_name = "productsCtg", directory = "data/tabechoku
 # ---- *Crawl detailed pages one by one ----
 
 # Set for-loop basics
+# lst_html_details <- list()
 pb <- create_new_pb(nrow(df_productsCtg))
-lst_html_details <- list()
 min_sleep <- 1
 max_sleep <- 2
 estimated_min <- ceiling(nrow(df_productsCtg) * (((max_sleep - min_sleep) / 2) + min_sleep) / 60)
 print(paste("ESTIMATED: ", estimated_min, "min (", ceiling(estimated_min / 60), "hours)", sep = "" ))
+len <- length(lst_html_details)
+i <- 0
 
 # Crawl and retrieve html nodes
 for(id in df_productsCtg$id_product) {
@@ -178,33 +186,44 @@ for(id in df_productsCtg$id_product) {
   # Show progress and remaining time
   pb$tick()
   
-  # Set URL for search
-  url_this <- paste(url_productsCtg, "/", id, sep = "")
-  
-  # Set for unexpected error
-  tryCatch(
-    {
-      # Retrieve html: Get html and turn it into list
-      lst_html_this <- list(read_html(url_this)) 
-      
-      # Push html into a list
-      lst_html_details <- append(lst_html_details, lst_html_this)
-      
-      # Pause scraping
-      Sys.sleep(sample( seq(from = min_sleep, to = max_sleep, by = 1), 1))
-    },
+  # Existing check
+  flag <- TRUE
+  i = i + 1
+  if(i <= len){
+    flag <- FALSE
+  } else{
     
-    # If unexpected error occurred, skip for the next loop.
-    error = function(e){
-      next
-    }
-  )
+    # Set URL for search
+    url_this <- paste(url_productsCtg, "/", id, sep = "")
+    
+    # Set for unexpected error
+    tryCatch(
+      {
+        # Retrieve html: Get html and turn it into list
+        lst_html_this <- list(read_html(url_this)) 
+        
+        # Push html into a list
+        lst_html_details <- append(lst_html_details, lst_html_this)
+        
+        # Pause scraping
+        Sys.sleep(sample( seq(from = min_sleep, to = max_sleep, by = 1), 1))
+      },
+      
+      # If unexpected error occurred, skip for the next loop.
+      error = function(e){
+        flag <- FALSE
+      }
+    )
+  }
+  if(!flag) next
 }
+
 
 
 # ---- *Extract values from html ----
 # ---- *Export as Rds file ----
-save(lst_html_details, file = "details_20221124.RData")
+save(lst_html_details, file = "data/tabechoku/details_20221124.RData")
+
 
 
 
