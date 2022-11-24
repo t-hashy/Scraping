@@ -12,16 +12,19 @@ check_data <- function(df, plot = FALSE) {
 }
 
 ## ---- *Export data-frame ----
-export_df <- function(df, file_name = "data", directory = "data", file_type = "Rds") {
+export_data <- function(data, file_name = "data", directory = "data", file_type = "Rds") {
   # Set file name
   now <- convert_datetime_into_str()
   file <- paste(directory, "/", file_name, "_", now, ".", file_type, sep = "")
   # Convert into file
   if(file_type == "Rds"){
-    saveRDS(df, file = file)  
+    saveRDS(data, file = file)  
   }else if(file_type == "csv"){
-    write.csv(x = df, file = file, fileEncoding = "shift-jis")
+    write.csv(x = data, file = file, fileEncoding = "shift-jis")
+  }else if(file_type == "RData"){
+    save(data, file = file)  
   }
+  
   # Return
   return(file)
 }
