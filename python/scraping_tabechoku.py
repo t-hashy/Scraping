@@ -71,8 +71,12 @@ for res in lst_res:
     reviews = int( reviews.replace('件のレビュー',''))
     price = soup.find('p', class_="price").text
     price = int(price.replace('¥','').replace(',', ''))
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+### ~~~~~ HERE's THE PONT ~~~~~
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
     categories = soup.find_all(class_='product-categories_link-wrap')
-    
         
 
     # Push into df
