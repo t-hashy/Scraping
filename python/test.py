@@ -1,3 +1,4 @@
+#%%
 import requests
 from bs4 import BeautifulSoup
 import csv
@@ -33,7 +34,6 @@ df_names = pd.DataFrame(lst_names, columns=['No', 'Name'])
 path = "test.feather"
 feather.write_feather(df_names, path)
 
-f_df = feather.read_feather('test.feather')
 
 # filename = 'names.csv'
 # with open(filename, 'w', newline='') as f:
@@ -41,3 +41,10 @@ f_df = feather.read_feather('test.feather')
 #     w.writeheader()
 # 
 #     w.writerows(lst_names)
+
+# %%
+import pandas as pd
+import feather
+data = pd.read_feather('C:/Users/taka-/Downloads/rsc_ec-analytics/data/tabechoku/productsCtg_20221123-173118.feather')
+data.to_feather('../data/tabechoku/test.ftr')
+# %%
