@@ -4,7 +4,7 @@ test = True
 initialization = True
 
 # Files importing: Describe file path or "False" value.
-imp_id = "../data/tabechoku/productsCtg_20221123-173118.feather"
+imp_id = "../data/tabechoku/productsCtg_20221123-173118.feather" # Must be file path
 imp_cnt_items = False
 imp_items = False
 imp_tags = False
