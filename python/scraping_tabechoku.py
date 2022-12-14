@@ -15,6 +15,8 @@ import time
 
 url_base = "https://www.tabechoku.com/products/"
 
+sleep_period = 5
+
 lst_ids = []
 lst_res = []
 
@@ -40,7 +42,7 @@ for id in ids:
     res = requests.get(url)
 
     # Sleep 1 sec in every 10 requests
-    if count % 5 == 0:
+    if count % sleep_period == 0:
         time.sleep(1)
     
     # If GET request goes with error, skip to next id.
@@ -56,11 +58,11 @@ for id in ids:
     # Count up
     print(count)
     
-    ## FOR TEST
-    #if count > 5:
-    #    break
+   """  # FOR TEST
+    if count > 10:
+        break """
 
-#%% ==== Set basics for saving items results as a feather file
+#%% ==== Set basics for saving items results
 
 from datetime import datetime 
 def datafile_path( file_title:str, folder_name: str = "tabechoku", extention: str = ".feather"):
@@ -110,7 +112,7 @@ for res in lst_res:
 # Save df as a feather file
 df_soup_items.to_feather(datafile_path("soup_items"))
 
-#%% ==== Set basics for extracting items info
+#%% ===|= Set basics for extracting items info
 
 """df_items = pd.DataFrame(columns=['product_id', 'item_name', 'reviews', 'price', "volume", "product_pros", "producing_pros", "lrg_category", "sml_category", "pref", "description"])"""
 df_items = pd.DataFrame(columns=['product_id', 'item_name', 'reviews', 'price'])
@@ -174,10 +176,11 @@ for soup in list(df_soup_items.soup):
     # Count
     print(count)
 
-    # FOR TEST
+    """ # FOR TEST
     if count > 20:
-        break
-#%% ===|= Export items df as a feather file
+        break """
+
+# Export items df as a feather file
 df_items.to_feather(datafile_path("items"))
 """ df_tags.to_feather(datafile_path("tags")) """
 
@@ -187,31 +190,31 @@ df_pageinfo = pd.DataFrame(columns=["product_id", "page_num"])
 
 #%% ==|== Crawl reviews pages
 count = 0
-for id in list(df_items.product_id):
+for product_id in list(df_items.product_id):
     
     # If id is already in the list, skip to next
-    if id in df_pageinfo.product_id:
+    if product_id in df_pageinfo.product_id:
         print("skip|" + str(count))
         continue
 
     # Get numbers of reviews
-    num_reviews = df_items[df_items["product_id"] == id].reviews
-    num_pages = round((num_reviews + 19) / 20)
+    num_reviews = int(df_items[df_items["product_id"] == product_id].reviews)
+    num_pages = round((num_reviews+9) / 20)
 
     # Get HTML on every page
-    for num_page in range(num_pages):
+    for num_page in range(1,num_pages):
 
         # Count up
         count += 1
         
         # Set url to get
-        url = url_base +  id + "/reviews?page=" + str(num_page)
+        url = url_base +  product_id + "/reviews?page=" + str(num_page)
 
         # Get HTML
         res = requests.get(url)
 
-       # Sleep 1 sec in every 10 requests
-        if count % 5 == 0:
+       # Sleep 1 sec respecitively
+        if count % sleep_period == 0:
             time.sleep(1)
     
         # If GET request goes with error, skip to next id.
@@ -222,10 +225,7 @@ for id in list(df_items.product_id):
 
         # Push results into lists
         lst_reviews.append(res)
-        df_pageinfo = df_pageinfo.append({
-            "product_id": id,
-            "page_num": num_page
-        }, ignore_index = True)
+        df_pageinfo.loc[len(df_pageinfo)] = [product_id, num_page]
 
         # Count up
         print(count)
@@ -233,46 +233,73 @@ for id in list(df_items.product_id):
         """ # FOR TEST
         if count > 5:
             break """
-#%% ==== Set basics for extracting reviews info
-df_reviews = pd.DataFrame(columns=["product_id", "rating", "comment"])
-df_html_reviews = pd.DataFrame(columns=["product_id", "page_num","html"])
 
-#%% ==|== Ectract reviews info from HTML
+#%% ==== Set basics for saving reviews results
+df_soup_reviews = pd.DataFrame(columns=["product_id", "page_num", "soup"])
+
+#%% ==== Export reviews soup df as a feather file
 count = 0
-for review in lst_reviews:
-
-    # Get id and pagenumber
-    product_id = df_pageinfo[count].product_id
-    page_num = df_pageinfo[count].page_num
+for reviews in lst_reviews:
     
+    # Get the id
+    product_id = str(df_pageinfo.product_id[count])
+    page_num = int(df_pageinfo.page_num[count])
+
     # Count up
-    count +=1
+    count += 1
 
-    # Check existence
-    if page_num in df_reviews[product_id == product_id].page_num:
-        print("skip|" + str(count))
-        continue
-
+    # If already exists, skip for next.
+    if product_id in list(df_soup_reviews.product_id):
+        if page_num in list(df_soup_reviews.page_num):
+            print("skip|" + str(count))
+            continue
+    
     # Get the contents
-    soup = bs(review.content, "html.parser")
-    df_html_reviews.append({
-        "product_id": product_id,
-        "page_num": page_num,
-        "html": soup.text
-    }, ignore_index=True)
+    soup = bs(reviews.content, 'html.parser')
+    df_soup_reviews.loc[len(df_soup_reviews)] = [product_id, page_num, soup]
 
-    # Extract the data
-    rating = 
-    comment = 
+    # Count
+    print(count)
+
+# Save df as a feather file
+df_soup_reviews.to_feather(datafile_path("soup_reviews"))
+
+
+#%% ==== Set basics for extracting reviews info
+
+df_reviews = pd.DataFrame(columns=["product_id", "rating", "comment"])
+
+#%% ==|== Extract reviews info from soup
+count = 0
+for soup in list(df_soup_reviews.soup):
+
+    # Get id and page number
+    product_id = str(df_soup_reviews.product_id[count])
+
+    # Count up
+    count += 1
+    
+    # Extract items info
+    try:
+        rating = soup.find('', class_='').text
+    except:
+        rating = 0
+    
+    try:
+        comment = soup.find('', class_='').span.text
+    except:
+        comment = "Not Found"
 
     # Push into df
-    df_reviews.append({
-        "product_id": product_id,
-        "rating": rating,
-        "comment": comment
-    }, ignore_index=True)
+    df_reviews.loc[len(df_reviews)] = [product_id, rating, comment]
 
-    # Count 
+    # Count
     print(count)
-#%% ==== Export reviews info as a feather file.
-df_reviews.to_feather( data_dir + 'reviews_' + filename_tail)
+
+    """ # FOR TEST
+    if count > 20:
+        break """
+
+# Export items df as a feather file
+df_reviews.to_feather(datafile_path("reviews"))
+# %%
