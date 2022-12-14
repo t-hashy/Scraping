@@ -60,41 +60,97 @@ for id in ids:
     #if count > 5:
     #    break
 
-#%% ==== Set basics for extracting items info
+#%% ==== Set basics for saving items results as a feather file
+
+from datetime import datetime 
+def datafile_path( file_title:str, folder_name: str = "tabechoku", extention: str = ".feather"):
+    # Set directory to save
+    dir = "../data/" + folder_name + "/"
+
+    # Set time stamp in a file name
+    now = datetime.now()
+    year = str(now.year)
+    month = str(now.month)
+    day = str(now.day)
+    hour = str(now.hour)
+    minute = str(now.minute)
+
+    # Create file name
+    filename = dir + file_title + "_" + year + month + day + "-" + hour + minute + extention
+
+    # Return
+    return filename
+
 from bs4 import BeautifulSoup as bs # Inspect the url
 
-df_htmls = pd.DataFrame(columns=["product_id", "html"])
-df_items = pd.DataFrame(columns=['product_id', 'item_name', 'reviews', 'price', "volume", "product_pros", "producing_pros", "lrg_category", "sml_category", "pref", "description"])
-df_tags = pd.DataFrame(columns=["product_id", "tag"])
+df_soup_items = pd.DataFrame(columns=["product_id", "soup"])
 
-#%% ===|= Extract items info from HTML
+#%% ==== Export items soup df as a feather file
 count = 0
 for res in lst_res:
-
-    # Get id
+    
+    # Get the id
     product_id = lst_ids[count]
 
     # Count up
     count += 1
 
     # If already exists, skip for next.
-    if product_id in df_items.product_id:
+    if product_id in list(df_soup_items.product_id):
         print("skip|" + str(count))
         continue
     
     # Get the contents
     soup = bs(res.content, 'html.parser')
-    df_htmls.append({
-        "product_id": product_id,
-        "htmls": soup.text
-    }, ignore_index = True)
+    df_soup_items.loc[len(df_soup_items)] = [product_id, soup]
 
-    # Extract basics
-    item_name = soup.find('h1', class_='item-name').text
-    reviews = soup.find('a', class_='product-review-link').span.text
-    reviews = int( reviews.replace('件のレビュー','').replace(",","").replace(",",""))
-    price = soup.find('p', class_="price").text
-    price = int(price.replace('¥','').replace(',', ''))
+    # Count
+    print(count)
+
+# Save df as a feather file
+df_soup_items.to_feather(datafile_path("soup_items"))
+
+#%% ==== Set basics for extracting items info
+
+"""df_items = pd.DataFrame(columns=['product_id', 'item_name', 'reviews', 'price', "volume", "product_pros", "producing_pros", "lrg_category", "sml_category", "pref", "description"])"""
+df_items = pd.DataFrame(columns=['product_id', 'item_name', 'reviews', 'price'])
+df_tags = pd.DataFrame(columns=["product_id", "tag"])
+
+#%% ==|== Extract items info from soup
+count = 0
+for soup in list(df_soup_items.soup):
+
+    # Get id
+    product_id = df_soup_items.product_id[count]
+
+    # Count up
+    count += 1
+
+    # Check existense
+    if product_id in list(df_items.product_id):
+        print("skip|" + str(count))
+        continue
+    
+    # Extract items info
+    try:
+        item_name = soup.find('h1', class_='item-name').text
+    except:
+        item_name = "Not Found"
+    
+    try:
+        reviews = soup.find('a', class_='product-review-link').span.text
+    except:
+        reviews = 0
+    else:
+        reviews = int( reviews.replace('件のレビュー','').replace(",","").replace(",",""))
+    
+    try:
+        price = soup.find('p', class_="price").text
+    except:
+        price = 0
+    else:
+        price = int(price.replace('¥','').replace(',', ''))
+
     """ volume = 
     product_pros = 
     producing_pros =
@@ -110,53 +166,20 @@ for res in lst_res:
             "product_id": product_id,
             "tag": tag
         }, ignore_index=True)
-     """
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-### ~~~~~ HERE's THE PONT ~~~~~
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~       
+     """      
 
     # Push into df
-    df_items = df_items.append({
-        'product_id': product_id,
-        'item_name': item_name,
-        'reviews': reviews,
-        'price': price
-    },ignore_index=True)
-
-    # For more columns
-    """'volume': volume,
-    "product_pros": product_pros,
-    "producing_pros": producing_pros,
-    "lrg_category": lrg_category,
-    "sml_category": sml_category,
-    "pref": pref,
-    "description": description  """
+    df_items.loc[len(df_items)] = [product_id, item_name, reviews, price]
 
     # Count
     print(count)
 
     # FOR TEST
-    """ if count > 5:
-        break """
-#%% ==== Eport items info as a feather file
-
-# Set datetime for export file name
-from datetime import datetime 
-now = datetime.now()
-year = str(now.year)
-month = str(now.month)
-day = str(now.day)
-hour = str(now.hour)
-minute = str(now.minute)
-
-# Set file name
-data_dir = "../data/tabechoku/"
-filename_tail = year + month + day + "-" + hour + minute + ".feather"
-
-# Export
-# df_htmls.to_feather(data_dir + "htmls_" + filename_tail)
-df_items.to_feather( data_dir +  'items_' +  filename_tail)
-# df_tags.to_feather( data_dir + 'tags_' +  filename_tail)
+    if count > 20:
+        break
+#%% ===|= Export items df as a feather file
+df_items.to_feather(datafile_path("items"))
+""" df_tags.to_feather(datafile_path("tags")) """
 
 #%% ==== Set basics for scraping reviews page
 lst_reviews = []
@@ -164,7 +187,7 @@ df_pageinfo = pd.DataFrame(columns=["product_id", "page_num"])
 
 #%% ==|== Crawl reviews pages
 count = 0
-for id in lst_ids:
+for id in list(df_items.product_id):
     
     # If id is already in the list, skip to next
     if id in df_pageinfo.product_id:
@@ -172,8 +195,8 @@ for id in lst_ids:
         continue
 
     # Get numbers of reviews
-    num_reviews = df_items[product_id==id].reviews
-    num_pages = round(num_reviews + 19)
+    num_reviews = df_items[df_items["product_id"] == id].reviews
+    num_pages = round((num_reviews + 19) / 20)
 
     # Get HTML on every page
     for num_page in range(num_pages):
@@ -182,7 +205,7 @@ for id in lst_ids:
         count += 1
         
         # Set url to get
-        url = url_base +  id + "/reviews?page=" + num_page
+        url = url_base +  id + "/reviews?page=" + str(num_page)
 
         # Get HTML
         res = requests.get(url)
@@ -199,17 +222,17 @@ for id in lst_ids:
 
         # Push results into lists
         lst_reviews.append(res)
-        df_pageinfo.append({
-            "product_id": product_id,
+        df_pageinfo = df_pageinfo.append({
+            "product_id": id,
             "page_num": num_page
         }, ignore_index = True)
 
         # Count up
         print(count)
     
-        # FOR TEST
+        """ # FOR TEST
         if count > 5:
-            break
+            break """
 #%% ==== Set basics for extracting reviews info
 df_reviews = pd.DataFrame(columns=["product_id", "rating", "comment"])
 df_html_reviews = pd.DataFrame(columns=["product_id", "page_num","html"])
