@@ -30,6 +30,41 @@ export_data <- function(data, file_name = "data", directory = "data", file_type 
 }
 
 
+## ---- *Convert nested json like list to data frame ----
+lst.to.df <- function(lst){
+  
+  # Set base data frame
+  df <- data.frame()
+  
+  # Set progress bar
+  pb <- create_new_pb(length(lst))
+  
+  # Convert each row
+  for(lst.this in lst){
+    pb$tick()
+    
+    unlisted.this <- unlist(lst.this)
+    names <- names(unlisted.this)
+    
+    df.this <- unlisted.this %>%
+      imap(function(this,i){
+        name.this <- names[i]
+        data.this <- list(this)
+        names(data.this) <- name.this
+        return(this)
+      }) %>%
+      as.data.frame()
+    
+    if(length(df) == 0){
+      df <- df.this
+    }else{
+      df <- bind_rows(df, df.this)
+    }
+  }
+  
+  # Return converted data frame
+  return(df)
+}
 # ==== DATE TIME ====
 
 ## ---- *Convert datetime into string ----
@@ -46,8 +81,7 @@ convert_datetime_into_str <- function(datetime = Sys.time()) {
 
 ## ---- *Create progress bar on console ----
 create_new_pb <- function(length)  {
-  library(progress)
-  progress_bar$new(
+  progress::progress_bar$new(
     format = "(:spin) [:bar] :percent [Elaspsed time: :elapsedfull || Estimated time remaining: :eta]",
     total = length,
     complete = "=",
